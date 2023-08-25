@@ -22,3 +22,10 @@ user:
 	go build -o ./rpc/user/userservice ./rpc/user
 	go mod tidy
 	./rpc/user/userservice
+
+# run the feed
+.PHONY: feed
+feed:
+	go build -o ./rpc/feed/feedservice ./rpc/feed
+	go mod tidy
+	./rpc/feed/feedservice

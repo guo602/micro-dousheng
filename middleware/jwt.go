@@ -95,3 +95,35 @@ func GenerateJWTToken(userID int64) string {
 
 	return tokenString
 }
+
+// 解析 JWT Token
+func ParsedJWTToken(tokenString string) (int64,error) {
+	// 解析Token
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.AppConfigInstance.JWTSecretKey), nil
+	})
+
+	if err != nil {
+		fmt.Println("无效的Token")
+		return -1,err
+	}
+
+	// 检查Token是否有效
+	if token.Valid {
+		// 检查Token是否已经过期
+		if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
+			fmt.Println("Token已过期")
+			return -1,err
+		}
+	}
+
+	// 提取用户标识
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if userID, ok := claims["user_id"].(float64); ok {
+		
+			return int64(userID),nil
+		}
+	}
+
+	return 0,nil
+}

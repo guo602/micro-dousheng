@@ -78,8 +78,6 @@ func (s *UserServiceImpl) Login(ctx context.Context, request *user.DouyinUserLog
 		resp = &user.DouyinUserLoginResponse{StatusCode: -1, StatusMsg: "用户名密码不正确"}
 		return 
 	}
-
-	// 生成 JWT Token
 	
 
 	resp = &user.DouyinUserLoginResponse{StatusCode: 0, UserId: login_user.ID ,StatusMsg: "登录成功"}
