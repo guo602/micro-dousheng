@@ -3,7 +3,7 @@
 package main
 
 import (
-	router "api_gateway/biz/router"
+	router "douyin/api_gateway/biz/router"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 

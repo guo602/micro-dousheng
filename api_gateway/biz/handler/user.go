@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 	"fmt"
-	"api_gateway/kitex_gen/user"
-	"api_gateway/kitex_gen/user/userservice"
+	"douyin/kitex_gen/user"
+	"douyin/kitex_gen/user/userservice"
 	"net/http"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/client"

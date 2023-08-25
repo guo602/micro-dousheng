@@ -2,11 +2,10 @@ package main
 
 import (
 	"context"
-	user "user/kitex_gen/user"
-	"user/database"
-	"user/database/models"
+	user "douyin/kitex_gen/user"
+	"douyin/database"
+	"douyin/database/models"
 	"golang.org/x/crypto/bcrypt"
-	
 )
 
 // UserServiceImpl implements the last service interface defined in the IDL.

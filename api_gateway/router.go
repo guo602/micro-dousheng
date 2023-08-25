@@ -3,7 +3,7 @@
 package main
 
 import (
-	handler "api_gateway/biz/handler"
+	handler "douyin/api_gateway/biz/handler"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 

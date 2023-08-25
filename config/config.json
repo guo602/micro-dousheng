@@ -1,0 +1,14 @@
+{
+    "DatabaseName": "douyin",
+    "DBHost": "8.130.126.94",
+    "DBPort": "3306",
+    "DBUser": "remote_user",
+    "DBPassword": "remote_password",
+    "JWTSecretKey": "douyin_secret",
+    "SrcSavedPath": "",
+    "AliyunOSSAccessKeyID": "LTAI5t5vsr4QEkPLxpqxRZCb",
+    "AliyunOSSAccessKeySecret": "G6THd0UE9ZxWnv7KwM4gNPVmXuQ6g9",
+    "AliyunOSSEndpoint": "oss-cn-hangzhou.aliyuncs.com",
+    "AliyunOSSBucketName": "simple-douyin-demo"
+}
+  
