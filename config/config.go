@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/spf13/viper"
+	"fmt"
 )
 
 // AppConfig stores the application configuration
@@ -19,14 +20,22 @@ type AppConfig struct {
 	AliyunOSSBucketName      string // 阿里云 OSS Bucket 名称
 }
 
-// AppConfigInstance holds the instance of the application configuration
-var AppConfigInstance AppConfig
-
-func init(){
-	LoadConfig()
+type UserInfoConfig struct {
+	DefaultAvatarURL           string
+	DefaultBackgroundImageURL  string
+	DefaultSignature           string
 }
 
-func LoadConfig() {
+// AppConfigInstance holds the instance of the application configuration
+var AppConfigInstance AppConfig
+var UserInfoConfigInstance UserInfoConfig
+
+func init(){
+	LoadAppConfig()
+	LoadUserInfoConfig()
+}
+
+func LoadAppConfig() {
 	// 初始化 Viper
 	viper.SetConfigFile("config/config.json") // 配置文件的路径
 
@@ -39,4 +48,10 @@ func LoadConfig() {
 	if err := viper.Unmarshal(&AppConfigInstance); err != nil {
 		panic(err)
 	}
+}
+
+func LoadUserInfoConfig(){
+	UserInfoConfigInstance.DefaultAvatarURL = fmt.Sprintf("https://%s.%s/%s", AppConfigInstance.AliyunOSSBucketName, AppConfigInstance.AliyunOSSEndpoint, "img/default_avatar.png")
+	UserInfoConfigInstance.DefaultBackgroundImageURL= fmt.Sprintf("https://%s.%s/%s", AppConfigInstance.AliyunOSSBucketName, AppConfigInstance.AliyunOSSEndpoint, "img/default_background.jpg")
+	UserInfoConfigInstance.DefaultSignature = "这个人很懒，什么都没有留下"
 }

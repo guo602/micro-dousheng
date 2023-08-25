@@ -21,6 +21,14 @@ func customizedRegister(r *server.Hertz) {
 		{
 			ui := handler.NewUserImpl()
 			userGroup.POST("/register/",  ui.Register)
+			userGroup.POST("/login/",  ui.LogIn)
+			userGroup.GET("/", middleware.JWTMiddleware(),ui.GetUserById)
+		}
+
+		feedGroup := rg.Group("/feed")
+		{
+			fi := handler.NewFeedImpl()
+			feedGroup.GET("/",  fi.GetFeed)
 		}
 
 	}

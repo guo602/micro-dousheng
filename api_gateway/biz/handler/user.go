@@ -22,6 +22,17 @@ type UserRegisterResponse struct {
 	Token      string `json:"token"`
 }
 
+
+// UserLoginResponse 是用户登录响应的结构体
+type UserLoginResponse struct {
+	StatusCode int32  `json:"status_code"`
+	StatusMsg  string `json:"status_msg"`
+	UserID     int64  `json:"user_id"`
+	Token      string `json:"token"`
+}
+
+
+
 func NewUserImpl() *UserImpl {
 	c, err := userservice.NewClient("user", client.WithHostPorts("127.0.0.1:9990"))
 	if err != nil {
@@ -65,30 +76,39 @@ func (u *UserImpl) Register(ctx context.Context, c *app.RequestContext) {
 
 	c.JSON(http.StatusOK, response)
 }
+// LogIn: Post请求
+func (u *UserImpl) LogIn(ctx context.Context, c *app.RequestContext) {
+	username, password := c.PostForm("username"), c.PostForm("password")
+	lr, err := u.client.Login(ctx, &user.DouyinUserLoginRequest{Username: username, Password: password})
+	if err != nil {
 
-// // LogOut: Post请求, 同上
-// func (u *UserImpl) LogOut(ctx context.Context, c *app.RequestContext) {
-// 	username := c.PostForm("username")
-// 	lor, err := u.client.LogOut(ctx, &biz.LogoutRequest{UserToken: username})
-// 	if err != nil {
-// 		c.JSON(200, data{
-// 			"msg":  err.Error(),
-// 			"data": "",
-// 			"code": -1,
-// 		})
-// 		return
-// 	}
-// 	if lor.GetBase().GetCode() == -1 {
-// 		c.JSON(200, data{
-// 			"msg":  lor.GetBase().GetMsg(),
-// 			"data": "",
-// 			"code": lor.GetBase().GetCode(),
-// 		})
-// 		return
-// 	}
-// 	c.JSON(200, data{
-// 		"msg":  lor.GetBase().GetMsg(),
-// 		"data": "",
-// 		"code": lor.GetBase().GetCode(),
-// 	})
-// }
+		response := UserLoginResponse{
+			StatusMsg:  "fail",
+		}
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	if lr.GetStatusCode() == -1 {
+		response := UserLoginResponse{
+			StatusMsg:  lr.GetStatusMsg(),
+		}
+		c.JSON(http.StatusInternalServerError,response )
+		return
+	}
+
+	token := middleware.GenerateJWTToken(lr.GetUserId())
+	response := UserLoginResponse{
+		StatusCode: lr.GetStatusCode(), // 成功状态码
+		StatusMsg:  lr.GetStatusMsg(),
+		UserID:     lr.GetUserId(),
+		Token:      token,
+	}
+	c.JSON(http.StatusOK, response)
+	
+}
+
+// GetUser: Get请求
+func (u *UserImpl) GetUserById(ctx context.Context, c *app.RequestContext) {
+	//to be done
+}
