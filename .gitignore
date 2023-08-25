@@ -6,3 +6,4 @@ output/
 local_*
 __debug_*
 ./idea
+config.json
