@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/client"
+	"douyin/middleware"
 )
 
 type UserImpl struct {
@@ -34,6 +35,8 @@ func NewUserImpl() *UserImpl {
 // Login: Post请求
 func (u *UserImpl) Register(ctx context.Context, c *app.RequestContext) {
 	username, password := c.PostForm("username"), c.PostForm("password")
+	fmt.Println(username)
+	fmt.Println(password)
 	lr, err := u.client.Register(ctx, &user.DouyinUserRegisterRequest{Username: username, Password: password})
 	if err != nil {
 		response := UserRegisterResponse{
@@ -50,11 +53,14 @@ func (u *UserImpl) Register(ctx context.Context, c *app.RequestContext) {
 		c.JSON(http.StatusInternalServerError,response )
 		return
 	}
+
+	token := middleware.GenerateJWTToken(lr.GetUserId())
+
 	response := UserRegisterResponse{
 		StatusCode: lr.GetStatusCode(), // 成功状态码
 		StatusMsg:  lr.GetStatusMsg(),
 		UserID:     lr.GetUserId(),
-		Token:      lr.GetToken(),
+		Token:      token,
 	}
 
 	c.JSON(http.StatusOK, response)

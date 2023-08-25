@@ -5,15 +5,25 @@ package main
 import (
 	handler "douyin/api_gateway/biz/handler"
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"douyin/middleware"
 )
 
 // customizeRegister registers customize routers.
 func customizedRegister(r *server.Hertz) {
-	r.GET("/ping", handler.Ping)
+	r.GET("/ping", middleware.JWTMiddleware(),handler.Ping)
 
 	// your code ...
 
-	ui := handler.NewUserImpl()
-	rg := r.Group("/v1")
-	rg.POST("/register", ui.Register)
+	
+	rg := r.Group("/douyin")
+	{
+		userGroup := rg.Group("/user")
+		{
+			ui := handler.NewUserImpl()
+			userGroup.POST("/register/",  ui.Register)
+		}
+
+	}
+
+	
 }

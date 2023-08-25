@@ -8,6 +8,7 @@ require (
 	github.com/apache/thrift v0.13.0
 	github.com/cloudwego/hertz v0.6.7
 	github.com/cloudwego/kitex v0.7.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/jinzhu/gorm v1.9.16
 	github.com/spf13/viper v1.16.0
 	golang.org/x/crypto v0.9.0
