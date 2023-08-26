@@ -23,6 +23,7 @@ make {your_service}
 |---------|---------------------|
 | HTTP 框架 | Hertz               |
 | RPC 框架  | Kitex               |
+| 服务发现  | etcd               |
 | 数据库     | MySQL、Redis |
 | 身份鉴权    | jwt              |
 | 对象存储    | Aliyun-oss               |

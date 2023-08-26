@@ -9,6 +9,12 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/client"
 	"douyin/middleware"
+	"douyin/config"
+	etcd "github.com/kitex-contrib/registry-etcd"
+	"time"
+	"github.com/cloudwego/kitex/pkg/retry"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+
 )
 
 type UserImpl struct {
@@ -34,10 +40,31 @@ type UserLoginResponse struct {
 
 
 func NewUserImpl() *UserImpl {
-	c, err := userservice.NewClient("user", client.WithHostPorts("127.0.0.1:9990"))
+	// c, err := userservice.NewClient("user", client.WithHostPorts("127.0.0.1:9990"))
+	// if err != nil {
+	// 	panic(fmt.Sprintf("create user client error: %v", err))
+	// }
+
+	r, err := etcd.NewEtcdResolver([]string{config.ServiceConfigInstance.EtcdAddress})
+	if err != nil {
+		panic(err)
+	}
+	ServiceName := config.ServiceConfigInstance.UserService.Name
+
+	c, err := userservice.NewClient(
+		ServiceName,
+		client.WithMuxConnection(1),                       // mux
+		client.WithRPCTimeout(30*time.Second),             // rpc timeout
+		client.WithConnectTimeout(30000*time.Millisecond), // conn timeout
+		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
+		client.WithResolver(r),                            // resolver
+		// Please keep the same as provider.WithServiceName
+		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: ServiceName}),
+	)
 	if err != nil {
 		panic(fmt.Sprintf("create user client error: %v", err))
 	}
+
 	return &UserImpl{client: c} // 指定下游的ip，高级用法可以使用resolver去调用服务注册中心
 }
 

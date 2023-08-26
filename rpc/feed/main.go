@@ -5,15 +5,25 @@ import (
 	"log"
 	"net"
 	"github.com/cloudwego/kitex/server"
+	"douyin/config"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	etcd "github.com/kitex-contrib/registry-etcd"
 	
 )
 
 
 func main() {
-	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:9991")
-	svr := feed.NewServer(new(FeedServiceImpl),server.WithServiceAddr(addr))
+	r, err := etcd.NewEtcdRegistry([]string{config.ServiceConfigInstance.EtcdAddress}) // r should not be reused.
+	if err != nil {
+		panic(err)
+	}
+	addr, _ := net.ResolveTCPAddr("tcp", config.ServiceConfigInstance.FeedService.Address)
+	svr := feed.NewServer(new(FeedServiceImpl),
+			server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.ServiceConfigInstance.FeedService.Name}), 
+			server.WithServiceAddr(addr),
+			server.WithRegistry(r),server.WithServiceAddr(addr))
 
-	err := svr.Run()
+	err = svr.Run()
 
 	if err != nil {
 		log.Println(err.Error())
