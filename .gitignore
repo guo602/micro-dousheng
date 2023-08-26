@@ -7,3 +7,7 @@ local_*
 __debug_*
 ./idea
 config.json
+api_gateway/api 
+rpc/feed/feedservice
+rpc/user/userservice
+rpc/publish/publishservice
