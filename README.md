@@ -14,7 +14,7 @@ make api
 make user
 make feed
 make {your_service}
-...""
+...
 ```
 
  ## 技术栈
@@ -27,6 +27,9 @@ make {your_service}
 | 数据库     | MySQL、Redis |
 | 身份鉴权    | jwt              |
 | 对象存储    | Aliyun-oss               |
+|    服务治理 |	OpenTelemetry|
+|链路追踪	|Jaeger             |
+
 
 
 ## 目录介绍
