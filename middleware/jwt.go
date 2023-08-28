@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"douyin/config"
+	"douyin/pkg/config"
 	"fmt"
 	"time"
 	"github.com/dgrijalva/jwt-go"

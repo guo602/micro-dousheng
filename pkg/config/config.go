@@ -31,15 +31,18 @@ var AppConfigInstance AppConfig
 var UserInfoConfigInstance UserInfoConfig
 var ServiceConfigInstance ServiceConfig
 
+var UserErrCodeInst UserErrCode
+
 func init(){
 	LoadAppConfig()
 	LoadUserInfoConfig()
 	InitServiceConfig()
+	InitErrConfig()
 }
 
 func LoadAppConfig() {
 	// 初始化 Viper
-	viper.SetConfigFile("config/config.json") // 配置文件的路径
+	viper.SetConfigFile("pkg/config/config.json") // 配置文件的路径
 
 	// 读取配置文件
 	if err := viper.ReadInConfig(); err != nil {
@@ -91,7 +94,13 @@ func InitServiceConfig(){
 		Address : "127.0.0.1:9995",
 	}
 }
-
+func InitErrConfig(){
+	UserErrCodeInst.ErrCode_SuccessCode = 0
+	UserErrCodeInst.ErrCode_ServiceErrCode = 10001
+	UserErrCodeInst.ErrCode_ParamErrCode = 10002
+	UserErrCodeInst.ErrCode_UserAlreadyExistErrCode = 10003
+	UserErrCodeInst.ErrCode_AuthorizationFailedErrCode = 10004
+}
 
 type Service struct {
 	Address string 
@@ -107,4 +116,12 @@ type ServiceConfig struct {
 	PublishService Service
 	CommentService Service
 	EtcdAddress string
+}
+
+type UserErrCode struct{
+	ErrCode_SuccessCode int64
+	ErrCode_ServiceErrCode int64
+	ErrCode_ParamErrCode int64
+	ErrCode_UserAlreadyExistErrCode int64
+	ErrCode_AuthorizationFailedErrCode int64
 }

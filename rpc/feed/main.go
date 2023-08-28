@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 	"github.com/cloudwego/kitex/server"
-	"douyin/config"
+	"douyin/pkg/config"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	etcd "github.com/kitex-contrib/registry-etcd"
 	

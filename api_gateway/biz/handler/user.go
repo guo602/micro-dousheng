@@ -9,11 +9,13 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/kitex/client"
 	"douyin/middleware"
-	"douyin/config"
+	"douyin/pkg/config"
 	etcd "github.com/kitex-contrib/registry-etcd"
 	"time"
 	"github.com/cloudwego/kitex/pkg/retry"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"github.com/cloudwego/hertz/pkg/common/utils"
 
 )
 
@@ -21,25 +23,9 @@ type UserImpl struct {
 	client userservice.Client
 }
 
-type UserRegisterResponse struct {
-	StatusCode int32  `json:"status_code"`
-	StatusMsg  string `json:"status_msg"`
-	UserID     int64  `json:"user_id"`
-	Token      string `json:"token"`
-}
+var UserImplInst UserImpl
 
-
-// UserLoginResponse 是用户登录响应的结构体
-type UserLoginResponse struct {
-	StatusCode int32  `json:"status_code"`
-	StatusMsg  string `json:"status_msg"`
-	UserID     int64  `json:"user_id"`
-	Token      string `json:"token"`
-}
-
-
-
-func NewUserImpl() *UserImpl {
+func init()  {
 	// c, err := userservice.NewClient("user", client.WithHostPorts("127.0.0.1:9990"))
 	// if err != nil {
 	// 	panic(fmt.Sprintf("create user client error: %v", err))
@@ -65,43 +51,54 @@ func NewUserImpl() *UserImpl {
 		panic(fmt.Sprintf("create user client error: %v", err))
 	}
 
-	return &UserImpl{client: c} // 指定下游的ip，高级用法可以使用resolver去调用服务注册中心
+	UserImplInst = UserImpl{client: c} 
+
+	// return &UserImpl{client: c} // 指定下游的ip，高级用法可以使用resolver去调用服务注册中心
 }
 
 
 
 // Login: Post请求
 func (u *UserImpl) Register(ctx context.Context, c *app.RequestContext) {
-	username, password := c.PostForm("username"), c.PostForm("password")
-	fmt.Println(username)
-	fmt.Println(password)
-	lr, err := u.client.Register(ctx, &user.DouyinUserRegisterRequest{Username: username, Password: password})
+	var err error
+	var req UserRegisterRequest
+	err = c.BindAndValidate(&req)
 	if err != nil {
-		response := UserRegisterResponse{
-			StatusMsg:  "fail",
-		}
-		c.JSON(http.StatusInternalServerError, response)
-		return
-	}
-	if lr.GetStatusCode() == -1 {
-		response := UserRegisterResponse{
-			StatusMsg:  lr.GetStatusMsg(),
-		}
-		
-		c.JSON(http.StatusInternalServerError,response )
+		SendResponse(c,consts.StatusInternalServerError , utils.H{
+			"StatusMsg": "bind and validate error",
+		})
 		return
 	}
 
-	token := middleware.GenerateJWTToken(lr.GetUserId())
+	rpc_resp, err := u.client.Register(ctx, &user.DouyinUserRegisterRequest{Username: req.Username, Password: req.Password})
+	if err != nil {
+		err_response := UserRegisterResponse{
+			StatusMsg:  "Register fail",
+		}
+		SendResponse(c,http.StatusInternalServerError, err_response)    // c.JSON(http.StatusInternalServerError, response)
+		return
+	}
 
-	response := UserRegisterResponse{
-		StatusCode: lr.GetStatusCode(), // 成功状态码
-		StatusMsg:  lr.GetStatusMsg(),
-		UserID:     lr.GetUserId(),
+	if rpc_resp.GetStatusCode() == -1 {
+		err_response := UserRegisterResponse{
+			StatusCode: rpc_resp.GetStatusCode(),
+			StatusMsg:  rpc_resp.GetStatusMsg(),
+		}
+		SendResponse(c,consts.StatusInternalServerError , err_response)
+		return
+	}
+
+	token := middleware.GenerateJWTToken(rpc_resp.GetUserId())
+
+	success_response := UserRegisterResponse{
+		StatusCode: rpc_resp.GetStatusCode(), // 成功状态码
+		StatusMsg:  rpc_resp.GetStatusMsg(),
+		UserID:     rpc_resp.GetUserId(),
 		Token:      token,
 	}
 
-	c.JSON(http.StatusOK, response)
+	SendResponse(c,consts.StatusOK , success_response)
+
 }
 // LogIn: Post请求
 func (u *UserImpl) LogIn(ctx context.Context, c *app.RequestContext) {
@@ -131,7 +128,7 @@ func (u *UserImpl) LogIn(ctx context.Context, c *app.RequestContext) {
 		UserID:     lr.GetUserId(),
 		Token:      token,
 	}
-	c.JSON(http.StatusOK, response)
+	c.JSON(consts.StatusOK, response)
 	
 }
 
@@ -139,3 +136,5 @@ func (u *UserImpl) LogIn(ctx context.Context, c *app.RequestContext) {
 func (u *UserImpl) GetUserById(ctx context.Context, c *app.RequestContext) {
 	//to be done
 }
+
+

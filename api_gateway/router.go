@@ -6,6 +6,7 @@ import (
 	handler "douyin/api_gateway/biz/handler"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"douyin/middleware"
+
 )
 
 // customizeRegister registers customize routers.
@@ -19,16 +20,14 @@ func customizedRegister(r *server.Hertz) {
 	{
 		userGroup := rg.Group("/user")
 		{
-			ui := handler.NewUserImpl()
-			userGroup.POST("/register/",  ui.Register)
-			userGroup.POST("/login/",  ui.LogIn)
-			userGroup.GET("/", middleware.JWTMiddleware(),ui.GetUserById)
+			userGroup.POST("/register/",  handler.UserImplInst.Register)
+			userGroup.POST("/login/",  handler.UserImplInst.LogIn)
+			userGroup.GET("/", middleware.JWTMiddleware(),handler.UserImplInst.GetUserById)
 		}
 
 		feedGroup := rg.Group("/feed")
 		{
-			fi := handler.NewFeedImpl()
-			feedGroup.GET("/",  fi.GetFeed)
+			feedGroup.GET("/",handler.FeedImplInst.GetFeed)
 		}
 
 	}
