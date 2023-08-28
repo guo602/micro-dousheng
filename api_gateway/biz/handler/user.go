@@ -16,6 +16,10 @@ import (
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/kitex-contrib/obs-opentelemetry/provider"
+	"github.com/kitex-contrib/obs-opentelemetry/tracing"
+
+
 
 )
 
@@ -35,6 +39,13 @@ func init()  {
 	if err != nil {
 		panic(err)
 	}
+	provider.NewOpenTelemetryProvider(
+		provider.WithServiceName(config.UserServiceName),
+		provider.WithExportEndpoint(config.ExportEndpoint),
+		provider.WithInsecure(),
+	)
+	
+
 	ServiceName := config.ServiceConfigInstance.UserService.Name
 
 	c, err := userservice.NewClient(
@@ -44,6 +55,7 @@ func init()  {
 		client.WithConnectTimeout(30000*time.Millisecond), // conn timeout
 		client.WithFailureRetry(retry.NewFailurePolicy()), // retry
 		client.WithResolver(r),                            // resolver
+		client.WithSuite(tracing.NewClientSuite()),
 		// Please keep the same as provider.WithServiceName
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: ServiceName}),
 	)

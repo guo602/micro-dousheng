@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
-	feed "douyin/kitex_gen/feed"
-	"douyin/middleware"
 	"douyin/database"
 	"douyin/database/models"
+	feed "douyin/kitex_gen/feed"
+	"douyin/middleware"
+	"fmt"
 	"log"
 	"time"
+	"gorm.io/gorm"
+
 )
 
 // FeedServiceImpl implements the last service interface defined in the IDL.
@@ -27,16 +30,18 @@ func (s *FeedServiceImpl) ListVideos(ctx context.Context, request *feed.DouyinFe
 		uid , _ = middleware.ParsedJWTToken(token)
 	}
 
+	fmt.Println(uid)
+
 	var video_ids []int64
 	var videos []models.Video
 	result := database.DB.Table("video").Select("id").Find(&videos)
 	if result.Error != nil {
-		log.Fatal(result.Error)
+		log.Println(result.Error)
 	}
 	for _, video := range videos {
 		video_ids = append(video_ids, video.VideoID)
 	}
-	// fmt.Println(video_ids)
+	
 
 	//新发布的先刷到，将vid倒叙排列
 	video_ids = reverseList(video_ids)
@@ -45,7 +50,6 @@ func (s *FeedServiceImpl) ListVideos(ctx context.Context, request *feed.DouyinFe
 		Videos = append(Videos, Get_Video_for_feed(v_id, uid))
 	}
 
-	
 	
 
 	resp = &feed.DouyinFeedResponse{  
@@ -72,9 +76,10 @@ func Get_Video_for_feed(video_id int64, current_userID int64) *feed.Video {
 	if result.Error != nil {
 		log.Fatal(result.Error)
 	}
+	
 	autherID := video.AuthorUserID
 	author_resp := Get_author_for_feed(autherID, current_userID)
-
+	
 	var far models.Favorite
 	var isfar bool
 	result2 := database.DB.Table("favorite").Where("user_id = ? AND video_id = ? AND is_deleted=-1", current_userID, video_id).First(&far)
@@ -109,15 +114,20 @@ func Get_author_for_feed(author_id int64, current_userID int64) feed.User {
 	var relation models.Relation
 	var follow bool
 
+	
+
 	result1 := database.DB.Table("user").Where("id = ?", author_id).First(&author)
+	
 	if result1.Error != nil {
-		log.Fatal(result1.Error)
+		log.Println(result1.Error)
 	}
 
+	
+
 	result2 := database.DB.Table("relation").Where("follower_id = ? AND followed_id = ?", current_userID, author_id).First(&relation)
-	// if result2.Error != nil && result2.Error != gorm.ErrRecordNotFound {
-	// 	log.Fatal(result2.Error)
-	// }
+	if result2.Error != nil && result2.Error != gorm.ErrRecordNotFound {
+		log.Println(result2.Error)
+	}
 
 	if result2.RowsAffected > 0 {
 		follow = true

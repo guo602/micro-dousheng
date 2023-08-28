@@ -8,6 +8,8 @@ import (
 	"douyin/pkg/config"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	etcd "github.com/kitex-contrib/registry-etcd"
+	"github.com/kitex-contrib/obs-opentelemetry/provider"
+	"github.com/kitex-contrib/obs-opentelemetry/tracing"	
 	
 )
 
@@ -18,9 +20,16 @@ func main() {
 		panic(err)
 	}
 	addr, _ := net.ResolveTCPAddr("tcp", config.ServiceConfigInstance.FeedService.Address)
+	
+	provider.NewOpenTelemetryProvider(
+		provider.WithServiceName(config.FeedServiceName),
+		provider.WithExportEndpoint(config.ExportEndpoint),
+		provider.WithInsecure(),
+	)
 	svr := feed.NewServer(new(FeedServiceImpl),
 			server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: config.ServiceConfigInstance.FeedService.Name}), 
 			server.WithServiceAddr(addr),
+			server.WithSuite(tracing.NewServerSuite()),
 			server.WithRegistry(r),server.WithServiceAddr(addr))
 
 	err = svr.Run()

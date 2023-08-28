@@ -37,7 +37,6 @@ func ConnectDB() error {
 		panic("Failed to connect to the database")
 	} else {
 		fmt.Println("Connected to the database")
-		
 	}
 
 	return nil

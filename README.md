@@ -37,3 +37,21 @@ make {your_service}
 | Idl    | 项目所有服务的 IDL 文件 |
 | kitex_gen | kitex自动生成代码          |
 | rpc | kitex业务逻辑代码        |
+
+## Jaeger
+
+Visit `http://127.0.0.1:16686/` on browser
+
+#### Snapshots
+
+![jaeger-tracing](./docs/images/Jaeger_0.png)
+
+![jaeger-architecture](./docs/images/Jaeger_1.png)
+
+## Grafana
+
+Visit `http://127.0.0.1:3000/` on browser
+
+#### Dashboard Example
+
+![grafana-dashboard-example](./docs/images/grafana_trace.png)

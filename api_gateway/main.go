@@ -3,11 +3,32 @@
 package main
 
 import (
+	"context"
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"douyin/pkg/config"
+	"github.com/hertz-contrib/gzip"
+	hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
+	"github.com/kitex-contrib/obs-opentelemetry/provider"
 )
 
 func main() {
-	h := server.Default()
+	// 链路追踪
+	p := provider.NewOpenTelemetryProvider(
+		provider.WithServiceName(config.ServiceConfigInstance.GatewayService.Name),
+		provider.WithExportEndpoint(config.ExportEndpoint),
+		provider.WithInsecure(),
+	)
+	defer p.Shutdown(context.Background())
+	tracer, tracerCfg := hertztracing.NewServerTracer()
+
+	h := server.Default(
+		server.WithHostPorts(config.ServiceConfigInstance.GatewayService.Address),
+		// server.WithMaxRequestBodySize(config.MAX_REQUEST_BODY_SIZE),
+		tracer,
+	)
+	h.Use(gzip.Gzip(gzip.DefaultCompression),
+			hertztracing.ServerMiddleware(tracerCfg))
+	h.Use(hertztracing.ServerMiddleware(tracerCfg))
 
 	register(h)
 	h.Spin()
